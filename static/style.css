@@ -1,0 +1,86 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to right, #74ebd5, #acb6e5);
+    text-align: center;
+    padding: 20px;
+}
+
+/* Main Container */
+.container {
+    max-width: 400px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Title */
+h1 {
+    color: #333;
+}
+
+/* Form Input */
+form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background: #28a745;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #218838;
+}
+
+/* Task List */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: #f9f9f9;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Completed Task */
+.completed {
+    text-decoration: line-through;
+    color: gray;
+}
+
+/* Buttons */
+.actions a {
+    text-decoration: none;
+    font-size: 18px;
+    margin: 0 5px;
+}
+
+.complete-btn {
+    color: green;
+}
+
+.delete-btn {
+    color: red;
+}
