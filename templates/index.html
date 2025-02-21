@@ -3,27 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List</title>
+    <title>Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>📝 My To-Do List</h1>
-        <form action="/add" method="post">
-            <input type="text" name="task" placeholder="Enter a task..." required>
-            <button type="submit">➕ Add Task</button>
+        <h1>Login</h1>
+        <form action="/login" method="post">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
         </form>
-        <ul>
-            {% for task in tasks %}
-            <li class="{{ 'completed' if task.done else '' }}">
-                {{ task.task }}
-                <div class="actions">
-                    <a href="/complete/{{ loop.index0 }}" class="complete-btn">✔</a>
-                    <a href="/delete/{{ loop.index0 }}" class="delete-btn">❌</a>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="alert">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
     </div>
 </body>
 </html>
