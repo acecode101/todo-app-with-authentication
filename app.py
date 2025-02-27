@@ -1,18 +1,19 @@
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # SQLite DB
-app.config['SECRET_KEY'] = 'your_secret_key'  # Protects sessions
+app.config["SECRET_KEY"] = "your_secret_key"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'  # Redirect if user is not logged in
+login_manager.login_view = "login"
 
-# User model for authentication
+# User Model
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
@@ -22,53 +23,76 @@ class User(db.Model, UserMixin):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Route for homepage
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template("index.html")
 
-# Route for login
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User.query.filter_by(username=username).first()
-        if user and bcrypt.check_password_hash(user.password, password):
-            login_user(user)
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid credentials', 'danger')
-    return render_template('login.html')
-
-# Route for registering new users
-@app.route('/register', methods=['GET', 'POST'])
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = bcrypt.generate_password_hash(request.form['password']).decode('utf-8')
-        new_user = User(username=username, password=password)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('Account created! You can log in now.', 'success')
-        return redirect(url_for('login'))
-    return render_template('register.html')
+    try:
+        if request.method == "POST":
+            username = request.form["username"]
+            password = request.form["password"]
+            
+            if not username or not password:
+                flash("Please fill in all fields", "danger")
+                return redirect(url_for("register"))
+            
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user:
+                flash("Username already taken. Choose another one.", "warning")
+                return redirect(url_for("register"))
 
-# Protected Dashboard route
-@app.route('/dashboard')
+            hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+            new_user = User(username=username, password=hashed_password)
+            db.session.add(new_user)
+            db.session.commit()
+
+            flash("Account created! You can now login.", "success")
+            return redirect(url_for("login"))
+        
+        return render_template("register.html")
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        flash("An unexpected error occurred. Try again.", "danger")
+        return redirect(url_for("register"))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    try:
+        if request.method == "POST":
+            username = request.form["username"]
+            password = request.form["password"]
+            user = User.query.filter_by(username=username).first()
+
+            if user and bcrypt.check_password_hash(user.password, password):
+                login_user(user)
+                flash("Login successful!", "success")
+                return redirect(url_for("dashboard"))
+            else:
+                flash("Invalid username or password", "danger")
+
+        return render_template("login.html")
+
+    except Exception as e:
+        print(f"Error: {e}")
+        flash("An unexpected error occurred. Try again.", "danger")
+        return redirect(url_for("login"))
+
+@app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template('dashboard.html', username=current_user.username)
+    return f"Welcome {current_user.username}! <a href='{url_for('logout')}'>Logout</a>"
 
-# Route for logout
-@app.route('/logout')
+@app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    flash('Logged out successfully!', 'info')
-    return redirect(url_for('login'))
+    flash("Logged out successfully!", "info")
+    return redirect(url_for("login"))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with app.app_context():
-        db.create_all()  # Create database tables
+        db.create_all()  # Ensure the database is created
     app.run(debug=True)
