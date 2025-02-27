@@ -1,5 +1,5 @@
-Flask
-Flask-SQLAlchemy
-Flask-Bcrypt
-Flask-Login
+flask
+flask_sqlalchemy
+flask_bcrypt
+flask_login
 gunicorn
