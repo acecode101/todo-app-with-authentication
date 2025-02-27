@@ -1,12 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Welcome to the To-Do App</h1>
-    <a href="{{ url_for('login') }}">Login</a> | 
-    <a href="{{ url_for('register') }}">Register</a>
+    <div class="container">
+        <h1>📝 My To-Do List</h1>
+        <p>Welcome, <strong>{{ session['user_id'] }}</strong>! <a href="{{ url_for('logout') }}">Logout</a></p>
+
+        <form action="/add" method="post">
+            <input type="text" name="task" placeholder="Enter a task..." required>
+            <button type="submit">➕ Add Task</button>
+        </form>
+        
+        <ul>
+            {% for task in tasks %}
+            <li class="{{ 'completed' if task.done else '' }}">
+                {{ task.task }}
+                <div class="actions">
+                    <a href="/complete/{{ task.id }}" class="complete-btn">✔</a>
+                    <a href="/delete/{{ task.id }}" class="delete-btn">❌</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </body>
 </html>
