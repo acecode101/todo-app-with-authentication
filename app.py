@@ -77,3 +77,8 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+    from your_application import db  # Change 'your_application' to your actual app module
+
+with app.app_context():
+    db.create_all()  # This will create the missing 'user' table if it doesn't exist
+
