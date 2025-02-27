@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+
+# Flask database
+instance/
+*.sqlite
+*.db
+
+# Config file (if contains sensitive data)
+config.py
+
+# IDE/editor files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Logs
+logs/
+*.log
+
+# Python package files
+*.egg-info/
+dist/
+build/
