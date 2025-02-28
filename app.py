@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # Change this to a secure key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Suppress warning
+
 db = SQLAlchemy(app)
 
 # User Model
@@ -13,13 +15,22 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
 
-# To-Do List Data (Temporary Storage)
-tasks = []
+# Task Model
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    task = db.Column(db.String(255), nullable=False)
+    done = db.Column(db.Boolean, default=False)
+
+# Ensure database tables are created
+with app.app_context():
+    db.create_all()
 
 @app.route('/')
 def home():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+    tasks = Task.query.filter_by(user_id=session['user_id']).all()
     return render_template("index.html", tasks=tasks)
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -31,7 +42,7 @@ def signup():
         if User.query.filter_by(username=username).first():
             flash("Username already exists. Try another one!", "danger")
         else:
-            hashed_password = generate_password_hash(password)
+            hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
             new_user = User(username=username, password=hashed_password)
             db.session.add(new_user)
             db.session.commit()
@@ -48,15 +59,10 @@ def login():
 
         user = User.query.filter_by(username=username).first()
 
-        if user:
-            if check_password_hash(user.password, password):
-                session['user_id'] = user.id
-                flash("Login successful!", "success")
-                return redirect(url_for('home'))
-            else:
-                flash("Incorrect password!", "danger")
-        else:
-            flash("Username does not exist!", "danger")
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            return redirect(url_for('home'))
+        flash("Invalid username or password!", "danger")
     
     return render_template("login.html")
 
@@ -70,24 +76,38 @@ def logout():
 def add_task():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    task = request.form.get("task")
-    if task:
-        tasks.append({"task": task, "done": False})
+    
+    task_text = request.form.get("task")
+    if task_text:
+        new_task = Task(user_id=session['user_id'], task=task_text)
+        db.session.add(new_task)
+        db.session.commit()
+    
     return redirect(url_for('home'))
 
-@app.route('/complete/<int:index>')
-def complete_task(index):
-    if 0 <= index < len(tasks):
-        tasks[index]["done"] = not tasks[index]["done"]  # ✅ Fix: Toggle task completion
+@app.route('/complete/<int:task_id>')
+def complete_task(task_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    task = Task.query.get(task_id)
+    if task and task.user_id == session['user_id']:
+        task.done = not task.done
+        db.session.commit()
+    
     return redirect(url_for('home'))
 
-@app.route('/delete/<int:index>')
-def delete_task(index):
-    if 0 <= index < len(tasks):
-        tasks.pop(index)
+@app.route('/delete/<int:task_id>')
+def delete_task(task_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    task = Task.query.get(task_id)
+    if task and task.user_id == session['user_id']:
+        db.session.delete(task)
+        db.session.commit()
+    
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()  # ✅ Fix: Ensure DB is created before running
     app.run(debug=True)
