@@ -19,7 +19,7 @@ class User(db.Model):
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    task = db.Column(db.String(255), nullable=False)
+    task_text = db.Column(db.String(255), nullable=False)
     done = db.Column(db.Boolean, default=False)
 
 # Ensure database tables are created
@@ -30,6 +30,7 @@ with app.app_context():
 def home():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+    
     tasks = Task.query.filter_by(user_id=session['user_id']).all()
     return render_template("index.html", tasks=tasks)
 
@@ -80,7 +81,7 @@ def add_task():
     task_text = request.form.get("task")
     if task_text:
         try:
-            new_task = Task(user_id=session['user_id'], task=task_text)
+            new_task = Task(user_id=session['user_id'], task_text=task_text, done=False)
             db.session.add(new_task)
             db.session.commit()
             flash("Task added successfully!", "success")
