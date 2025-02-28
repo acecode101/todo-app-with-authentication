@@ -6,13 +6,16 @@ app.secret_key = "your_secret_key"  # Change this to a secure key
 
 # Sample user storage (Replace with a database in production)
 users = {}
-
-tasks = []  # List to store tasks
+user_tasks = {}  # Store tasks separately for each user
 
 @app.route('/')
 def home():
     if "user" not in session:
         return redirect(url_for("login"))
+
+    username = session["user"]
+    tasks = user_tasks.get(username, [])  # Get tasks for logged-in user
+
     return render_template("index.html", tasks=tasks)
 
 @app.route('/signup', methods=["GET", "POST"])
@@ -25,6 +28,7 @@ def signup():
             flash("Username already exists! Choose another.", "error")
         else:
             users[username] = generate_password_hash(password)
+            user_tasks[username] = []  # Create an empty task list for this user
             flash("Signup successful! Please log in.", "success")
             return redirect(url_for("login"))
 
@@ -55,9 +59,12 @@ def add_task():
     if "user" not in session:
         return redirect(url_for("login"))
 
+    username = session["user"]
     task = request.form.get("task")
+
     if task:
-        tasks.append({"task": task, "done": False})
+        user_tasks[username].append({"task": task, "done": False})  # Add task to this user's list
+
     return redirect(url_for("home"))
 
 @app.route('/complete/<int:index>')
@@ -65,8 +72,10 @@ def complete_task(index):
     if "user" not in session:
         return redirect(url_for("login"))
 
-    if 0 <= index < len(tasks):
-        tasks[index]["done"] = True
+    username = session["user"]
+    if 0 <= index < len(user_tasks[username]):
+        user_tasks[username][index]["done"] = True
+
     return redirect(url_for("home"))
 
 @app.route('/delete/<int:index>')
@@ -74,8 +83,10 @@ def delete_task(index):
     if "user" not in session:
         return redirect(url_for("login"))
 
-    if 0 <= index < len(tasks):
-        tasks.pop(index)
+    username = session["user"]
+    if 0 <= index < len(user_tasks[username]):
+        user_tasks[username].pop(index)  # Remove task from this user's list
+
     return redirect(url_for("home"))
 
 if __name__ == "__main__":
