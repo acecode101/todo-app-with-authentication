@@ -22,8 +22,8 @@
             <li class="{{ 'completed' if task.done else '' }}">
                 {{ task.task }}
                 <div class="actions">
-                    <a href="/complete/{{ loop.index0 }}" class="complete-btn">✔</a>
-                    <a href="/delete/{{ loop.index0 }}" class="delete-btn">❌</a>
+                    <a href="/complete/{{ task.id }}" class="complete-btn">✔</a>
+                    <a href="/delete/{{ task.id }}" class="delete-btn">❌</a>
                 </div>
             </li>
             {% endfor %}
