@@ -9,19 +9,21 @@
 <body>
     <div class="container">
         <h1>🔐 Signup</h1>
-        {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         {% endwith %}
-        <form method="POST">
-            <input type="text" name="username" placeholder="Enter username" required>
-            <input type="password" name="password" placeholder="Enter password" required>
-            <button type="submit">Sign Up</button>
+        <form action="/signup" method="post">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Signup</button>
         </form>
-        <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+        <p>Already have an account? <a href="/login">Login</a></p>
     </div>
 </body>
 </html>
