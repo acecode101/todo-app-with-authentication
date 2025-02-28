@@ -9,7 +9,8 @@
 <body>
     <div class="container">
         <h1>📝 My To-Do List</h1>
-        <p>Welcome, {{ username }}! <a href="/logout" class="logout-btn">Logout</a></p>
+        
+        <p>Welcome, {{ session['user'] }}! <a href="/logout">Logout</a></p>
 
         <form action="/add" method="post">
             <input type="text" name="task" placeholder="Enter a task..." required>
