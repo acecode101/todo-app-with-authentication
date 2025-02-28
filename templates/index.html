@@ -9,25 +9,24 @@
 <body>
     <div class="container">
         <h1>📝 My To-Do List</h1>
-        
-        <form action="{{ url_for('add_task') }}" method="post">
+        <p>Welcome, <strong>{{ session['user_id'] }}</strong>! <a href="{{ url_for('logout') }}">Logout</a></p>
+
+        <form action="/add" method="post">
             <input type="text" name="task" placeholder="Enter a task..." required>
             <button type="submit">➕ Add Task</button>
         </form>
         
         <ul>
             {% for task in tasks %}
-            <li class="{{ 'completed' if task.done else '' }}">
+            <li class="task-item {% if task.done %}completed{% endif %}">
                 {{ task.task }}
                 <div class="actions">
-                    <a href="{{ url_for('complete_task', index=loop.index0) }}" class="complete-btn">✔</a>
-                    <a href="{{ url_for('delete_task', index=loop.index0) }}" class="delete-btn">❌</a>
+                    <a href="/complete/{{ task.id }}" class="complete-btn">✔</a>
+                    <a href="/delete/{{ task.id }}" class="delete-btn">❌</a>
                 </div>
             </li>
             {% endfor %}
         </ul>
-
-        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
     </div>
 </body>
 </html>
