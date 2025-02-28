@@ -79,10 +79,15 @@ def add_task():
     
     task_text = request.form.get("task")
     if task_text:
-        new_task = Task(user_id=session['user_id'], task=task_text)
-        db.session.add(new_task)
-        db.session.commit()
-    
+        try:
+            new_task = Task(user_id=session['user_id'], task=task_text)
+            db.session.add(new_task)
+            db.session.commit()
+            flash("Task added successfully!", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error adding task: {str(e)}", "danger")
+
     return redirect(url_for('home'))
 
 @app.route('/complete/<int:task_id>')
