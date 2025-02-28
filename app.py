@@ -51,6 +51,7 @@ def login():
         if user:
             if check_password_hash(user.password, password):
                 session['user_id'] = user.id
+                flash("Login successful!", "success")
                 return redirect(url_for('home'))
             else:
                 flash("Incorrect password!", "danger")
@@ -77,7 +78,7 @@ def add_task():
 @app.route('/complete/<int:index>')
 def complete_task(index):
     if 0 <= index < len(tasks):
-        tasks[index]["done"] = not tasks[index]["done"]
+        tasks[index]["done"] = not tasks[index]["done"]  # ✅ Fix: Toggle task completion
     return redirect(url_for('home'))
 
 @app.route('/delete/<int:index>')
@@ -88,5 +89,5 @@ def delete_task(index):
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()
+        db.create_all()  # ✅ Fix: Ensure DB is created before running
     app.run(debug=True)
