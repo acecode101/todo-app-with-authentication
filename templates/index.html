@@ -9,20 +9,20 @@
 <body>
     <div class="container">
         <h1>📝 My To-Do List</h1>
-        <p>Welcome, <strong>{{ session['user_id'] }}</strong>! <a href="{{ url_for('logout') }}">Logout</a></p>
+        <p>Welcome, {{ username }}! <a href="/logout" class="logout-btn">Logout</a></p>
 
         <form action="/add" method="post">
             <input type="text" name="task" placeholder="Enter a task..." required>
             <button type="submit">➕ Add Task</button>
         </form>
-        
+
         <ul>
             {% for task in tasks %}
-            <li class="task-item {% if task.done %}completed{% endif %}">
+            <li class="{{ 'completed' if task.done else '' }}">
                 {{ task.task }}
                 <div class="actions">
-                    <a href="/complete/{{ task.id }}" class="complete-btn">✔</a>
-                    <a href="/delete/{{ task.id }}" class="delete-btn">❌</a>
+                    <a href="/complete/{{ loop.index0 }}" class="complete-btn">✔</a>
+                    <a href="/delete/{{ loop.index0 }}" class="delete-btn">❌</a>
                 </div>
             </li>
             {% endfor %}
